@@ -1,8 +1,8 @@
 type Operator = '+' | '-' | '*' | '/'
 
-
 let firstNumber: number
 let secondNumber: number
+
 const OPERATORS = {
     addition: '+' as Operator,
     subtraction: '-' as Operator,
