@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-    base: '/Etch-a-Sketch/',
+    base: '/calculator/',
     build: {
         outDir: 'docs'
     }
