@@ -1,14 +1,14 @@
-type Operator = '+' | '-' | '*' | '/'
+import { roundUpDecimals } from './utils/helper'
 
-let firstNumber: number
-let secondNumber: number
+type Operator = '+' | '-' | '*' | '/' | null
 
-const OPERATORS = {
-    addition: '+' as Operator,
-    subtraction: '-' as Operator,
-    multiplication: '*' as Operator,
-    division: '/' as Operator
-}
+let firstNumber: number | null = null
+let secondNumber: number | null = null
+let result: number | null = null
+let currentOperator: Operator = null
+let resetDisplay: boolean = false
+let lastClickWasOperator: boolean = false
+let dotUsed: boolean = false
 
 function addition(firstNumber: number, secondNumber: number) {
     return firstNumber + secondNumber
@@ -29,17 +29,94 @@ function division(firstNumber: number, secondNumber: number) {
     return firstNumber / secondNumber
 }
 
+function screenDisplay() {
+    const keys = document.querySelectorAll('.key') as NodeListOf<HTMLButtonElement>
+    const display = document.querySelector('.display') as HTMLParagraphElement
+    keys.forEach(key => {
+        const value = key.textContent
+        key.addEventListener('click', () => {
+            if (key.classList.contains('number')) {
+                if (display.textContent === '0' || resetDisplay) {
+                    display.textContent = value
+                    resetDisplay = false
+                } else {
+                    display.textContent += value
+                }
+
+                if (currentOperator === null) {
+                    firstNumber = Number(display.textContent)
+                } else {
+                    secondNumber = Number(display.textContent)
+                }
+
+                lastClickWasOperator = false
+
+            } else if (key.classList.contains('operator')) {
+                if (lastClickWasOperator) { return }
+                if (firstNumber !== null && secondNumber !== null && currentOperator) {
+                    firstNumber = operate(firstNumber, secondNumber, currentOperator)
+                    display.textContent = String(firstNumber)
+                    secondNumber = null
+                }
+
+                currentOperator = value as Operator
+                resetDisplay = true
+                lastClickWasOperator = true
+                dotUsed = false
+
+            } else if (key.classList.contains('dot')) {
+                if (!dotUsed) {
+                    display.textContent += value
+                    dotUsed = true
+                }
+            } else if (key.classList.contains('equal')) {
+                if (firstNumber !== null && secondNumber !== null && currentOperator) {
+                    result = operate(firstNumber, secondNumber, currentOperator)
+                    display.textContent = String(result)
+                    firstNumber = result
+                    secondNumber = null
+                    currentOperator = null
+                    resetDisplay = true
+                }
+                lastClickWasOperator = false
+                dotUsed = false
+            }
+        })
+    });
+}
+
+function clear() {
+    const clearKey = document.querySelector('.clear') as HTMLButtonElement
+    const display = document.querySelector('.display') as HTMLParagraphElement
+    clearKey.addEventListener('click', () => {
+        display.textContent = '0'
+        firstNumber = null
+        secondNumber = null
+        currentOperator = null
+        resetDisplay = false
+        lastClickWasOperator = false
+        dotUsed = false
+    })
+}
+
 function operate(firstNumber: number, secondNumber: number, operator: Operator) {
     switch (operator) {
-        case OPERATORS.addition:
-            return addition(firstNumber, secondNumber)
-        case OPERATORS.subtraction:
-            return subtraction(firstNumber, secondNumber)
-        case OPERATORS.multiplication:
-            return multiplication(firstNumber, secondNumber)
-        case OPERATORS.division:
-            return division(firstNumber, secondNumber)
+        case '+':
+            return roundUpDecimals(addition(firstNumber, secondNumber))
+        case '-':
+            return roundUpDecimals(subtraction(firstNumber, secondNumber))
+        case '*':
+            return roundUpDecimals(multiplication(firstNumber, secondNumber))
+        case '/':
+            return roundUpDecimals(division(firstNumber, secondNumber))
         default:
             throw new Error(`Unknown Error: ${operator}`)
     }
 }
+
+function main() {
+    screenDisplay()
+    clear()
+}
+
+main()
