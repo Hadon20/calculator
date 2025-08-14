@@ -1,4 +1,5 @@
 import { roundUpDecimals } from './utils/helper'
+import { formatResult } from './utils/helper'
 
 type Operator = '+' | '-' | '*' | '/' | null
 
@@ -40,7 +41,11 @@ function screenDisplay() {
                     display.textContent = value
                     resetDisplay = false
                 } else {
-                    display.textContent += value
+                    if (display.textContent.length > 9) {
+                        return
+                    } else {
+                        display.textContent += value
+                    }
                 }
 
                 if (currentOperator === null) {
@@ -55,7 +60,7 @@ function screenDisplay() {
                 if (lastClickWasOperator) { return }
                 if (firstNumber !== null && secondNumber !== null && currentOperator) {
                     firstNumber = operate(firstNumber, secondNumber, currentOperator)
-                    display.textContent = String(firstNumber)
+                    display.textContent = String(formatResult(firstNumber))
                     secondNumber = null
                 }
 
@@ -72,7 +77,7 @@ function screenDisplay() {
             } else if (key.classList.contains('equal')) {
                 if (firstNumber !== null && secondNumber !== null && currentOperator) {
                     result = operate(firstNumber, secondNumber, currentOperator)
-                    display.textContent = String(result)
+                    display.textContent = String(formatResult(result))
                     firstNumber = result
                     secondNumber = null
                     currentOperator = null
@@ -114,9 +119,30 @@ function operate(firstNumber: number, secondNumber: number, operator: Operator) 
     }
 }
 
+function keyboardSupport() {
+    document.addEventListener('keydown', (event) => {
+        const key = event.key
+        if (!isNaN(Number(key))) {
+            document.querySelector(`.key.number[data-key="${key}"]`)?.dispatchEvent(new Event('click'))
+        } else if (key === '.') {
+            document.querySelector('.key.dot')?.dispatchEvent(new Event('click'))
+        } else if (key === 'Enter' || key === '=') {
+            if (key === 'Enter') {
+                event.preventDefault()
+            }
+            document.querySelector('.key.equal')?.dispatchEvent(new Event('click'))
+        } else if (['+', '-', '*', '/'].includes(key)) {
+            document.querySelector(`.key.operator[data-key="${key}"]`)?.dispatchEvent(new Event('click'))
+        } else if (key === 'c') {
+            document.querySelector('.key.clear')?.dispatchEvent(new Event('click'))
+        }
+    })
+}
+
 function main() {
     screenDisplay()
     clear()
+    keyboardSupport()
 }
 
 main()
