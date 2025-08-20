@@ -7,4 +7,5 @@ export function formatResult(num: number) {
     if (str.length > 9) {
         return num.toExponential(4)
     }
+    return num
 }
