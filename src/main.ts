@@ -1,12 +1,12 @@
 import { roundUpDecimals } from './utils/helper'
 import { formatResult } from './utils/helper'
 
-type Operator = '+' | '-' | '*' | '/' | null
+type Operator = '+' | '-' | '*' | '/'
 
 let firstNumber: number | null = null
 let secondNumber: number | null = null
 let result: number | null = null
-let currentOperator: Operator = null
+let currentOperator: Operator | null = null
 let resetDisplay: boolean = false
 let lastClickWasOperator: boolean = false
 let dotUsed: boolean = false
@@ -57,6 +57,7 @@ function screenDisplay() {
                 lastClickWasOperator = false
 
             } else if (key.classList.contains('operator')) {
+                if (display.textContent === '-') { return }
                 if (lastClickWasOperator) { return }
                 if (firstNumber !== null && secondNumber !== null && currentOperator) {
                     firstNumber = operate(firstNumber, secondNumber, currentOperator)
@@ -71,10 +72,19 @@ function screenDisplay() {
 
             } else if (key.classList.contains('dot')) {
                 if (!dotUsed) {
-                    display.textContent += value
+                    if (resetDisplay) {
+                        display.textContent = '0.'
+                        resetDisplay = false
+                    } else {
+                        display.textContent += value
+                    }
                     dotUsed = true
                 }
             } else if (key.classList.contains('equal')) {
+                if (display.textContent === '-') {
+                    display.textContent = '0'
+                    return
+                }
                 if (firstNumber !== null && secondNumber !== null && currentOperator) {
                     result = operate(firstNumber, secondNumber, currentOperator)
                     display.textContent = String(formatResult(result))
@@ -85,6 +95,24 @@ function screenDisplay() {
                 }
                 lastClickWasOperator = false
                 dotUsed = false
+            } else if (key.classList.contains('toggle')) {
+                if (display.textContent.startsWith('-') && display.textContent.length > 1) {
+                    display.textContent = display.textContent.slice(1)
+                } else if (display.textContent === '-') {
+                    display.textContent = '0'
+                } else {
+                    if (display.textContent === '0') {
+                        display.textContent = '-'
+                    } else {
+                        display.textContent = '-' + display.textContent
+                    }
+                }
+                if (display.textContent !== '-')
+                    if (currentOperator === null) {
+                        firstNumber = Number(display.textContent)
+                    } else {
+                        secondNumber = Number(display.textContent)
+                    }
             }
         })
     });
